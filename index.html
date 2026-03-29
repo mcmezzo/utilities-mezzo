@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accesso Docenti — Utilities</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f5f0e8;
+    --accent: #c8392b;
+    --muted: #7a7060;
+    --border: #d4cfc4;
+    --shadow: rgba(26,26,46,0.12);
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 20%, rgba(200,57,43,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 60% at 85% 80%, rgba(26,26,46,0.05) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 52px 48px 44px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 8px 40px var(--shadow), 0 1px 0 var(--border);
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .header { margin-bottom: 36px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid currentColor;
+    padding: 3px 8px;
+    border-radius: 2px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 30px;
+    color: var(--ink);
+    line-height: 1.15;
+    margin-bottom: 8px;
+  }
+
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .subtitle {
+    font-size: 13.5px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 28px 0; }
+
+  .field { margin-bottom: 20px; }
+
+  label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14.5px;
+    color: var(--ink);
+    background: var(--paper);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+  }
+
+  input:focus, select:focus {
+    border-color: var(--ink);
+    box-shadow: 0 0 0 3px rgba(26,26,46,0.06);
+    background: #fff;
+  }
+
+  input::placeholder { color: #bbb; }
+
+  .btn {
+    width: 100%;
+    padding: 13px;
+    margin-top: 8px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn:hover { background: #2d2d4a; }
+  .btn:active { transform: scale(0.99); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .btn .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto;
+  }
+
+  .btn.loading .btn-text { display: none; }
+  .btn.loading .spinner { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .error-box {
+    display: none;
+    background: #fef2f0;
+    border: 1px solid #f5c5c0;
+    border-radius: 2px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    margin-top: 16px;
+    animation: shake 0.3s ease;
+  }
+
+  .error-box.visible { display: block; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%      { transform: translateX(-6px); }
+    75%      { transform: translateX(6px); }
+  }
+
+  .footer {
+    margin-top: 28px;
+    font-size: 12px;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.7;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="header">
+    <div class="badge">Area riservata</div>
+    <h1>Accesso<br><em>Docenti</em></h1>
+    <p class="subtitle">Inserisci le credenziali per continuare</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="field">
+    <label for="ruolo">Accedi come</label>
+    <select id="ruolo">
+      <option value="docente">Docente</option>
+      <option value="admin">Amministratore</option>
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password">
+  </div>
+
+  <button class="btn" id="loginBtn" onclick="doLogin()">
+    <span class="btn-text">Accedi</span>
+    <div class="spinner"></div>
+  </button>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="footer">
+    Password dimenticata? Contatta l'animatore digitale per reimpostarla.<br>
+    Accesso riservato al personale docente.
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCWWqpA9M-qxqobeCBdTifuslXSge3mzc4",
+    authDomain:        "area-docenti.firebaseapp.com",
+    projectId:         "area-docenti",
+    storageBucket:     "area-docenti.firebasestorage.app",
+    messagingSenderId: "404321931541",
+    appId:             "1:404321931541:web:3b0b13193b207517e2d91c"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, user => {
+    if (user) window.location.href = "protetta.html";
+  });
+
+  window.doLogin = async function() {
+    const ruolo    = document.getElementById('ruolo').value;
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('loginBtn');
+    const errorBox = document.getElementById('errorBox');
+
+    errorBox.classList.remove('visible');
+    if (!password) { showError("Inserisci la password."); return; }
+
+    const email = ruolo + "@docenti.local";
+    btn.classList.add('loading');
+    btn.disabled = true;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (e) {
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      switch (e.code) {
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          showError("Password non corretta. Riprova."); break;
+        case 'auth/too-many-requests':
+          showError("Troppi tentativi. Attendi qualche minuto."); break;
+        default:
+          showError("Errore di accesso. Controlla la connessione.");
+      }
+    }
+  };
+
+  function showError(msg) {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.classList.add('visible');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.doLogin();
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Area Docenti</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1a2e;
+    --paper: #f5f0e8;
+    --accent: #c8392b;
+    --muted: #7a7060;
+    --border: #d4cfc4;
+    --shadow: rgba(26,26,46,0.10);
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Schermata di caricamento */
+  #loading {
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.3s;
+  }
+
+  .load-spinner {
+    width: 32px; height: 32px;
+    border: 2px solid var(--border);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Layout principale */
+  #app {
+    display: none;
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 48px 32px 80px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Topbar */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+
+  .badge {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid currentColor;
+    padding: 3px 8px;
+    border-radius: 2px;
+  }
+
+  .user-info {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .user-info strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .btn-logout {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 7px 14px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-logout:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* Titolo pagina */
+  .page-header { margin-bottom: 40px; }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    line-height: 1.15;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  h1 em { font-style: italic; color: var(--accent); }
+
+  .page-desc {
+    font-size: 15px;
+    color: var(--muted);
+    font-weight: 300;
+    max-width: 520px;
+    line-height: 1.65;
+  }
+
+  /* Sezione contenuti */
+  .section {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 16px var(--shadow);
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── MODIFICA IL CONTENUTO QUI SOTTO ─── */
+
+  .content-text {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  .content-text p { margin-bottom: 12px; }
+  .content-text p:last-child { margin-bottom: 0; }
+
+  /* Lista link */
+  .link-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .link-list li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    text-decoration: none;
+    color: var(--ink);
+    font-size: 14px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .link-list li a:hover {
+    border-color: var(--ink);
+    background: var(--paper);
+  }
+
+  .link-list li a .link-icon {
+    width: 28px; height: 28px;
+    background: var(--paper);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .link-list li a .link-label { flex: 1; font-weight: 400; }
+  .link-list li a .link-arrow { color: var(--muted); font-size: 16px; }
+</style>
+</head>
+<body>
+
+<!-- Schermata di caricamento -->
+<div id="loading">
+  <div class="load-spinner"></div>
+</div>
+
+<!-- Contenuto protetto -->
+<div id="app">
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="badge">Area riservata</div>
+      <span class="user-info">Accesso come: <strong id="userEmail">—</strong></span>
+    </div>
+    <button class="btn-logout" onclick="doLogout()">Esci</button>
+  </div>
+
+  <div class="page-header">
+    <h1>Area<br><em>Docenti</em></h1>
+    <p class="page-desc">Benvenuto nell'area riservata. Qui trovi i documenti, i link e le risorse ad accesso esclusivo.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!--   ▼▼▼  MODIFICA IL CONTENUTO QUI SOTTO  ▼▼▼  -->
+  <!-- ═══════════════════════════════════════════ -->
+
+  <div class="section">
+    <div class="section-title">Strumenti didattici</div>
+    <ul class="link-list">
+      <li>
+        <a href="https://mcmezzo.github.io/digicomp-icmezza/" target="_blank">
+          <span class="link-icon">🎓</span>
+          <span class="link-label">DigiComp Tracker — Registro attività digitali</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://viktormill2.github.io/consigliorientativo2/" target="_blank">
+          <span class="link-icon">📝</span>
+          <span class="link-label">Modulo consiglio orientativo</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://sites.google.com/icmezzocorona.it/adwebsite/verifica-protetta" target="_blank">
+          <span class="link-icon">🔒</span>
+          <span class="link-label">Verifica protetta</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/drive/folders/1X69K3lsO35l7f8M51-YRj3jE2kAoGib_?usp=drive_link" target="_blank">
+          <span class="link-icon">🎬</span>
+          <span class="link-label">Videolezioni</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Documenti istituzionali</div>
+    <ul class="link-list">
+      <li>
+        <a href="https://docs.google.com/document/d/1WGJx-Uv6ORL7hmzGg6XZZzh3eGL1zICQjdiAuTBOfq0/edit?usp=sharing" target="_blank">
+          <span class="link-icon">📋</span>
+          <span class="link-label">Protocollo benessere digitale e BYOD</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </li>
+      <li>
+        <a href="https://drive.google.com/file/d/1tl_QW4aOzIgVGzNFwlJ0T19jGaDB-sLO/view?usp=sharing" target="_blank">
+          <span class="link-icon">📄</span>
+          <span class="link-label">Piano digitale di rete</span>
+          <span class="link-arrow">→</span>
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- ═══════════════════════════════════════════ -->
+  <!--   ▲▲▲  FINE AREA CONTENUTO MODIFICABILE ▲▲▲  -->
+  <!-- ═══════════════════════════════════════════ -->
+
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // =============================================
+  //  ▼▼▼  STESSA CONFIG DI index.html  ▼▼▼
+  // =============================================
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCWWqpA9M-qxqobeCBdTifuslXSge3mzc4",
+    authDomain:        "area-docenti.firebaseapp.com",
+    projectId:         "area-docenti",
+    storageBucket:     "area-docenti.firebasestorage.app",
+    messagingSenderId: "404321931541",
+    appId:             "1:404321931541:web:3b0b13193b207517e2d91c"
+  };
+  // =============================================
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  onAuthStateChanged(auth, user => {
+    if (user) {
+      document.getElementById('userEmail').textContent = user.email;
+      document.getElementById('loading').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+      }, 300);
+    } else {
+      // Non autenticato → torna al login
+      window.location.href = "index.html";
+    }
+  });
+
+  window.doLogout = async function() {
+    await signOut(auth);
+    window.location.href = "index.html";
+  };
+</script>
+</body>
+</html>
